@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"example.com/mod/GoRESTService/url-shortener/internal/config"
+	"github.com/Danil-Zlo/url_shortener/internal/config"
 )
 
 func main() {
@@ -19,4 +19,8 @@ func main() {
 	// TODO: init router: chi, "chi render"
 
 	// TODO: run server
+}
+
+func setupLogger(env string) {
+	//
 }
