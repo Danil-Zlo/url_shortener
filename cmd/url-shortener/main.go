@@ -50,6 +50,7 @@ func main() {
 	log.Info("save url", slog.Int64("id", id))
 
 	_ = storage
+
 	// TODO: init router: chi, "chi render"
 
 	// TODO: run server
