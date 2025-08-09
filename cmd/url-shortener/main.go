@@ -20,7 +20,7 @@ func main() {
 
 	// init config: cleanenv
 	cfg := config.MustLoad()
-	fmt.Println(cfg)
+	fmt.Println(cfg.StoragePath)
 
 	// init logger: slog
 	log := setupLogger(cfg.Env)
@@ -29,13 +29,11 @@ func main() {
 	log.Debug("debug messages are enabled")
 
 	// init storage: sqlite
-
 	storage, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
 		log.Error("failed to init storage", sl.Err(err))
 		os.Exit(1)
 	}
-
 	_ = storage
 	// TODO: init router: chi, "chi render"
 
