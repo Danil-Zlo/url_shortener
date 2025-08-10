@@ -7,8 +7,11 @@ import (
 	"os"
 
 	"github.com/Danil-Zlo/url_shortener/internal/config"
+	mwLogger "github.com/Danil-Zlo/url_shortener/internal/http-server/middleware/logger"
 	sl "github.com/Danil-Zlo/url_shortener/internal/lib/logger/slog"
 	"github.com/Danil-Zlo/url_shortener/internal/storage/sqlite"
+	middleware "github.com/go-chi/chi/middleware"
+	chi "github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -35,13 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	id, err := storage.SaveURL("https://google.com", "google")
-	if err != nil {
-		log.Error("failed to save url", sl.Err(err))
-		os.Exit(1)
-	}
-
-	id, err = storage.SaveURL("https://google.com", "google")
+	id, err := storage.SaveURL("https://ya.ru", "yandex")
 	if err != nil {
 		log.Error("failed to save url", sl.Err(err))
 		os.Exit(1)
@@ -51,7 +48,15 @@ func main() {
 
 	_ = storage
 
-	// TODO: init router: chi, "chi render"
+	// init router: chi, "chi render"
+	router := chi.NewRouter()
+
+	// middleware
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Logger)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 
 	// TODO: run server
 }
