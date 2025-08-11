@@ -62,15 +62,15 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Route("/url", func(r chi.Router) {
-		// r.Use(middleware.BasicAuth("url-shortener", map[string]string{
-		// 	cfg.HTTPServer.User: cfg.HTTPServer.Password,
-		// }))
+		r.Use(middleware.BasicAuth("url-shortener", map[string]string{
+			cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		}))
+		router.Post("/", save.New(log, storage))
 
 		// TODO: delete method
 		// router.Delete("/url/{alias}", delete.New(log, storage))
 	})
 
-	router.Post("/", save.New(log, storage))
 	router.Get("/{alias}", redirect.New(log, storage))
 
 	// init server
