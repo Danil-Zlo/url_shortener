@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	slog "log/slog"
+	"net/http"
 	"os"
 
 	"github.com/Danil-Zlo/url_shortener/internal/config"
+	"github.com/Danil-Zlo/url_shortener/internal/http-server/handlers/url/save"
 	mwLogger "github.com/Danil-Zlo/url_shortener/internal/http-server/middleware/logger"
 	sl "github.com/Danil-Zlo/url_shortener/internal/lib/logger/slog"
 	"github.com/Danil-Zlo/url_shortener/internal/storage/sqlite"
@@ -38,13 +40,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	id, err := storage.SaveURL("https://ya.ru", "yandex")
-	if err != nil {
-		log.Error("failed to save url", sl.Err(err))
-		os.Exit(1)
-	}
+	// id, err := storage.SaveURL("https://ya.ru", "yandex")
+	// if err != nil {
+	// 	log.Error("failed to save url", sl.Err(err))
+	// 	os.Exit(1)
+	// }
 
-	log.Info("save url", slog.Int64("id", id))
+	// log.Info("save url", slog.Int64("id", id))
 
 	_ = storage
 
@@ -58,7 +60,25 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	// TODO: run server
+	router.Post("/url", save.New(log, storage))
+
+	// init server
+	log.Info("starting server", slog.String("address", cfg.Address))
+
+	srv := &http.Server{
+		Addr:         cfg.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+
+	// run server
+	if err := srv.ListenAndServe(); err != nil {
+		log.Error("failed to start server")
+	}
+
+	log.Error("server stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
